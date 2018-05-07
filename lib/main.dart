@@ -7,27 +7,101 @@ import 'package:scoped_multi_example/model.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  final routes = <String, WidgetBuilder>{
+    HomePage.route: (BuildContext context) => HomePage(),
+    DisplayPage.route: (BuildContext context) => DisplayPage(),
+  };
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Scoped Model MultiPage Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomePage(),
-    );
+    return ScopedModel<AppModel>(
+        model: AppModel(),
+        child: MaterialApp(
+          title: 'Scoped Model MultiPage Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: HomePage(),
+          routes: routes,
+        )
+
+        // home: DefaultTabController(
+        //   length: 2,
+        //   child: ScopedModel<AppModel>(
+        //     model: AppModel(),
+        //     child: Scaffold(
+        //       appBar: AppBar(
+        //         title: Text('Scoped Model Demo'),
+        //         bottom: TabBar(
+        //           tabs: <Widget>[
+        //             Tab(
+        //               icon: Icon(Icons.home),
+        //               text: 'Home Page',
+        //             ),
+        //             Tab(
+        //               icon: Icon(Icons.screen_rotation),
+        //               text: 'Display',
+        //             )
+        //           ],
+        //         ),
+        //       ),
+        //       body: TabBarView(
+        //         children: <Widget>[
+        //           HomePage(),
+        //           DisplayPage(),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // )
+        );
   }
 }
 
 class HomePage extends StatefulWidget {
+  static final String route = "Home-Page";
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<HomePage> {
+  TextEditingController controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home Page'),
+      ),
+      body: Center(
+          child: Column(
+        children: <Widget>[
+          Container(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+          ScopedModelDescendant<AppModel>(
+            builder: (context, child, model) => RaisedButton(
+                  child: Text('Add Item'),
+                  onPressed: () {
+                    Item item = Item(controller.text);
+                    model.addItem(item);
+                    setState(() => controller.text = '');
+                  },
+                ),
+          ),
+          RaisedButton(
+            child: Text('Display Page'),
+            onPressed: () {
+              Navigator
+                  .of(context)
+                  .push(MaterialPageRoute(builder: (context) => DisplayPage()));
+            },
+          )
+        ],
+      )),
+    );
   }
 }
 
